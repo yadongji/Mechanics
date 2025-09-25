@@ -115,7 +115,11 @@ public class CatchModel : MonoBehaviour
         // 对A应用速度
         if (accelerationA != 0) 
         {
-            rbA.velocity += Vector3.forward * accelerationA * Time.deltaTime/2;
+            rbA.velocity += Vector3.forward * accelerationA * Time.deltaTime;
+            if (rbA.velocity.z <= 0) 
+            {
+                rbA.velocity = new Vector3(0, 0, 0);
+            }
         }
 
         // 对B应用速度
