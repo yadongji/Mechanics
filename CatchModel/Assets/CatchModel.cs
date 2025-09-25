@@ -25,6 +25,7 @@ public class CatchModel : MonoBehaviour
     public Button BtnDataRefresh;
     public Button Puase;
     private DataControl dataControl;
+    private bool pausing;
     void Start()
     {
         // ±£¥Ê≥ı ºŒª÷√
@@ -37,6 +38,20 @@ public class CatchModel : MonoBehaviour
         InitializeCylinders();
         dataControl = GameObject.Find("Canvas").GetComponent<DataControl>();
         BtnDataRefresh.onClick.AddListener(ResetSimulation);
+        Puase.onClick.AddListener(Pause);
+    }
+
+    private void Pause()
+    {
+        pausing = !pausing;
+        if (pausing)
+        {
+            Time.timeScale = 0f;
+        }
+        else 
+        {
+            Time.timeScale = 1f;
+        }
     }
 
     void InitVelocity() 
@@ -78,6 +93,10 @@ public class CatchModel : MonoBehaviour
         if (accelerationB != 0) 
         {
             rbB.velocity += Vector3.forward * accelerationB * Time.deltaTime;
+        }
+        if (rbA.velocity.z == rbB.velocity.z) 
+        {
+            Pause();
         }
     }
 
