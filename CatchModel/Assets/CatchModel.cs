@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CatchModel : MonoBehaviour
 {
@@ -10,8 +11,8 @@ public class CatchModel : MonoBehaviour
     public float initialSpacing;
 
     [Header("参考物体")]
-    public GameObject cylinderA; // 细圆柱体A
-    public GameObject cylinderB; // 粗圆柱体B
+    public GameObject cylinderA; // A车
+    public GameObject cylinderB; // B车
 
 
     // 刚体组件
@@ -21,6 +22,9 @@ public class CatchModel : MonoBehaviour
     // 初始位置
     private Vector3 initialPosA;
     private Vector3 initialPosB;
+    public Button BtnDataRefresh;
+    public Button Puase;
+    private DataControl dataControl;
     void Start()
     {
         // 保存初始位置
@@ -31,6 +35,8 @@ public class CatchModel : MonoBehaviour
         InitVelocity();
         // 初始化物体位置和大小
         InitializeCylinders();
+        dataControl = GameObject.Find("Canvas").GetComponent<DataControl>();
+        BtnDataRefresh.onClick.AddListener(ResetSimulation);
     }
 
     void InitVelocity() 
@@ -50,13 +56,14 @@ public class CatchModel : MonoBehaviour
             cylinderB.transform.position = initialPosB;
         }
     }
-    
-    void Update()
+
+    void FixedUpdate()
     {
         // 应用自定义重力
         ApplyCustomAcceration();
 
         // 更新碰撞时间计算
+        dataControl.SetData(rbA.velocity.z.ToString("F2"), rbB.velocity.z.ToString("F2"), (cylinderB.transform.position.z - cylinderA.transform.position.z).ToString("F2"));
     }
 
     void ApplyCustomAcceration()
@@ -87,15 +94,15 @@ public class CatchModel : MonoBehaviour
     // 在Inspector中显示碰撞时间
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 120));
-        GUILayout.Label("A速度: " + rbA.velocity.z);
-        GUILayout.Label("B速度: " + rbB.velocity.z);
-        GUILayout.Label("AB间距: " + (cylinderB.transform.position.z-cylinderA.transform.position.z));
-        if (GUILayout.Button("重置模拟"))
-        {
-            ResetSimulation();
-        }
-
-        GUILayout.EndArea();
+        //GUILayout.BeginArea(new Rect(10, 10, 300, 120));
+        //GUILayout.Label("A速度: " + rbA.velocity.z);
+        //GUILayout.Label("B速度: " + rbB.velocity.z);
+        //GUILayout.Label("AB间距: " + ());
+        //if (GUILayout.Button("重置模拟"))
+        //{
+        //    ResetSimulation();
+        //}
+        //
+        //GUILayout.EndArea();
     }
 }
