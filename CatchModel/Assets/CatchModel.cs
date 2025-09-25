@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class CatchModel : MonoBehaviour
     public float accelerationB; // B的加速度
     public float velocityA; // A的初始速度
     public float velocityB; // B的初始速度
-    public float initialSpacing;
+    public float initialSpacing;//AB初始间距
 
     [Header("参考物体")]
     public GameObject cylinderA; // A车
@@ -30,7 +31,7 @@ public class CatchModel : MonoBehaviour
     {
         // 保存初始位置
         initialPosA = cylinderB.transform.position;
-        initialPosB = new Vector3(0, 0.5f, initialSpacing);
+        initialPosB = new Vector3(-2, 0.5f, initialSpacing);
         rbA = cylinderA.GetComponent<Rigidbody>();
         rbB = cylinderB.GetComponent<Rigidbody>();
         InitVelocity();
@@ -41,17 +42,45 @@ public class CatchModel : MonoBehaviour
         Puase.onClick.AddListener(Pause);
     }
 
-    private void Pause()
+    public void Pause(bool pause)
+    {
+        pausing = pause;
+        if (pausing)
+        {
+            Time.timeScale = 0f;
+            Puase.GetComponentInChildren<TextMeshProUGUI>().text = "Pause";
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            Puase.GetComponentInChildren<TextMeshProUGUI>().text = "Start";
+        }
+    }
+
+    public void Pause()
     {
         pausing = !pausing;
         if (pausing)
         {
             Time.timeScale = 0f;
+            Puase.GetComponentInChildren<TextMeshProUGUI>().text = "Pause";
         }
         else 
         {
             Time.timeScale = 1f;
+            Puase.GetComponentInChildren<TextMeshProUGUI>().text = "Start";
         }
+    }
+
+    public void RefreshData(string accelerationA,string accelerationB,string velocityA,string velocityB,string initialSpacing) 
+    {
+        this.accelerationA = float.Parse(accelerationA);
+        this.accelerationB = float.Parse(accelerationB);
+        this.velocityA = float.Parse(velocityA);
+        this.velocityB = float.Parse(velocityB);
+        this.initialSpacing = float.Parse(initialSpacing);
+        InitVelocity();
+        InitializeCylinders();
     }
 
     void InitVelocity() 
@@ -86,13 +115,13 @@ public class CatchModel : MonoBehaviour
         // 对A应用速度
         if (accelerationA != 0) 
         {
-            rbA.velocity += Vector3.forward * accelerationA * Time.deltaTime;
+            rbA.velocity += Vector3.forward * accelerationA * Time.deltaTime/2;
         }
 
         // 对B应用速度
         if (accelerationB != 0) 
         {
-            rbB.velocity += Vector3.forward * accelerationB * Time.deltaTime;
+            rbB.velocity += Vector3.forward * accelerationB * Time.deltaTime / 2;
         }
         if (rbA.velocity.z == rbB.velocity.z) 
         {
@@ -108,20 +137,5 @@ public class CatchModel : MonoBehaviour
         cylinderB.transform.position = initialPosB;
 
         InitVelocity();
-    }
-
-    // 在Inspector中显示碰撞时间
-    void OnGUI()
-    {
-        //GUILayout.BeginArea(new Rect(10, 10, 300, 120));
-        //GUILayout.Label("A速度: " + rbA.velocity.z);
-        //GUILayout.Label("B速度: " + rbB.velocity.z);
-        //GUILayout.Label("AB间距: " + ());
-        //if (GUILayout.Button("重置模拟"))
-        //{
-        //    ResetSimulation();
-        //}
-        //
-        //GUILayout.EndArea();
     }
 }
