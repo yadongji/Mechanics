@@ -5,8 +5,8 @@ public class FallingModel : MonoBehaviour
 {
     [Header("物体参数")]
     public float h = 2.0f; // 圆柱体长度
-    public float gravityA = 9.8f; // A的重力加速度
-    public float gravityB = 9.8f; // B的重力加速度
+    public float gravityA = 10f; // A的重力加速度
+    public float gravityB = 10f; // B的重力加速度
     public float cylinderARadius = 0.2f; // A的半径
     public float cylinderBRadius = 0.5f; // B的半径
 
@@ -20,6 +20,7 @@ public class FallingModel : MonoBehaviour
     private bool collisionOccured = false;
     private float collisionStartTime = 0f;
     private float collisionDuration = 0f;
+    private float collisionEndTime = 0f;
 
     // 刚体组件
     private Rigidbody rbA;
@@ -74,12 +75,9 @@ public class FallingModel : MonoBehaviour
         rbB.isKinematic = true; // 初始时B为运动学刚体，不受物理影响
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        // 应用自定义重力
         ApplyCustomGravity();
-
-        // 更新碰撞时间计算
     }
 
     void ApplyCustomGravity()
@@ -108,8 +106,6 @@ public class FallingModel : MonoBehaviour
                 isFallingB = true; // B开始自由落体
                 rbB.isKinematic = false; // 启用B的物理模拟
                 collisionStartTime = Time.time;
-
-                Debug.Log("碰撞发生！B开始自由落体");
             }
         }
     }
@@ -122,6 +118,8 @@ public class FallingModel : MonoBehaviour
             if (collisionOccured)
             {
                 collisionDuration = Time.time - collisionStartTime;
+                if (collisionDuration > 0.1f) { collisionEndTime = Time.time; }
+                
                 Debug.Log("A穿过B的时间(位置检测): " + collisionDuration + "秒");
             }
         }
@@ -136,6 +134,7 @@ public class FallingModel : MonoBehaviour
         collisionOccured = false;
         collisionStartTime = 0f;
         collisionDuration = 0f;
+        
 
         // 重置物体位置和速度
         cylinderA.transform.position = initialPosA;
@@ -158,6 +157,7 @@ public class FallingModel : MonoBehaviour
         GUILayout.Label("A穿过B的时间: " + (collisionDuration > 0 ? collisionDuration.ToString("F3") + "秒" : "尚未计算"));
         GUILayout.Label("A位置: " + cylinderA.transform.position.y.ToString("F2"));
         GUILayout.Label("B位置: " + cylinderB.transform.position.y.ToString("F2"));
+        GUILayout.Label("AB的相对速度: " + (rbA.velocity.y - rbB.velocity.y));
 
         if (GUILayout.Button("重置模拟"))
         {
