@@ -4,12 +4,12 @@ using UnityEngine.UI;
 
 public class CatchModel : MonoBehaviour
 {
-    [Header("物体参数")]
-    public float accelerationA ; // A的加速度
-    public float accelerationB; // B的加速度
-    public float velocityA; // A的初始速度
-    public float velocityB; // B的初始速度
-    public float initialSpacing;//AB初始间距
+    //[Header("物体参数")]
+    private float accelerationA ; // A的加速度
+    private float accelerationB; // B的加速度
+    private float velocityA; // A的初始速度
+    private float velocityB; // B的初始速度
+    private float initialSpacing;//AB初始间距
 
     [Header("参考物体")]
     public GameObject cylinderA; // A车
@@ -27,11 +27,14 @@ public class CatchModel : MonoBehaviour
     public Button Puase;
     private DataControl dataControl;
     private bool pausing;
+    private GUIStyle fontStyle;
+
     void Start()
     {
+        fontStyle = new GUIStyle();
+        fontStyle.fontSize = 60;
         // 保存初始位置
         initialPosA = cylinderB.transform.position;
-        initialPosB = new Vector3(-2, 0.5f, initialSpacing);
         rbA = cylinderA.GetComponent<Rigidbody>();
         rbB = cylinderB.GetComponent<Rigidbody>();
         InitVelocity();
@@ -79,6 +82,7 @@ public class CatchModel : MonoBehaviour
         this.velocityA = float.Parse(velocityA);
         this.velocityB = float.Parse(velocityB);
         this.initialSpacing = float.Parse(initialSpacing);
+        initialPosB = new Vector3(0, 0.5f, this.initialSpacing);
         InitVelocity();
         InitializeCylinders();
     }
@@ -125,7 +129,7 @@ public class CatchModel : MonoBehaviour
         // 对B应用速度
         if (accelerationB != 0) 
         {
-            rbB.velocity += Vector3.forward * accelerationB * Time.deltaTime / 2;
+            rbB.velocity += Vector3.forward * accelerationB * Time.deltaTime;
         }
         if (rbA.velocity.z == rbB.velocity.z) 
         {
@@ -141,5 +145,22 @@ public class CatchModel : MonoBehaviour
         cylinderB.transform.position = initialPosB;
 
         InitVelocity();
+    }
+
+    void OnGUI()
+    {
+        if (pausing) return;
+        GUILayout.BeginArea(new Rect(10, 10, 700, 400));
+        GUILayout.Label("A位置: " + cylinderA.transform.position.y.ToString("F2"), fontStyle);
+        GUILayout.Label("B位置: " + cylinderB.transform.position.y.ToString("F2"), fontStyle);
+        GUILayout.Label("AB的相对速度: " + (rbA.velocity.y - rbB.velocity.y).ToString("F2"), fontStyle);
+        GUI.skin.button.fontSize = 50;
+
+        if (GUILayout.Button("重置模拟"))
+        {
+            ResetSimulation();
+        }
+
+        GUILayout.EndArea();
     }
 }
