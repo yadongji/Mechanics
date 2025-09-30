@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FallingModel : MonoBehaviour
 {
@@ -20,12 +21,13 @@ public class FallingModel : MonoBehaviour
     private bool collisionOccured = false;
     private float collisionStartTime = 0f;
     private float collisionDuration = 0f;
-    private float collisionEndTime = 0f;
-
+    public Button activeBtn;
     // 刚体组件
     private Rigidbody rbA;
     private Rigidbody rbB;
 
+    private GUIStyle fontStyle;
+    public GameObject refreshPlane;
     // 初始位置
     private Vector3 initialPosA;
     private Vector3 initialPosB;
@@ -34,12 +36,17 @@ public class FallingModel : MonoBehaviour
         // 保存初始位置
         initialPosB = cylinderB.transform.position;
         initialPosA = new Vector3(0, initialPosB.y + 2*h, 0);
-
+        fontStyle = new GUIStyle();
+        fontStyle.fontSize = 60;
         // 初始化物体位置和大小
         InitializeCylinders();
 
         // 获取或添加刚体组件
         SetupRigidbodies();
+        activeBtn.onClick.AddListener(()=> { activeBtn.gameObject.SetActive(false);
+            Time.timeScale = 0f; refreshPlane.SetActive(true);
+            ResetSimulation();
+        });
     }
 
     void InitializeCylinders()
@@ -117,10 +124,7 @@ public class FallingModel : MonoBehaviour
         {
             if (collisionOccured)
             {
-                collisionDuration = Time.time - collisionStartTime;
-                if (collisionDuration > 0.1f) { collisionEndTime = Time.time; }
-                
-                Debug.Log("A穿过B的时间(位置检测): " + collisionDuration + "秒");
+                collisionDuration = Time.time - collisionStartTime;            
             }
         }
     }
@@ -146,19 +150,24 @@ public class FallingModel : MonoBehaviour
             rbB.velocity = Vector3.zero;
             rbB.isKinematic = true;
         }
+    }
 
-        Debug.Log("模拟已重置");
+    public void RefreshSpacing(string spacing)
+    {
+        initialPosA = new Vector3(0, initialPosB.y + h + float.Parse(spacing), 0);
+        activeBtn.gameObject.SetActive(true);
+        ResetSimulation();
     }
 
     // 在Inspector中显示碰撞时间
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 120));
-        GUILayout.Label("A穿过B的时间: " + (collisionDuration > 0 ? collisionDuration.ToString("F3") + "秒" : "尚未计算"));
-        GUILayout.Label("A位置: " + cylinderA.transform.position.y.ToString("F2"));
-        GUILayout.Label("B位置: " + cylinderB.transform.position.y.ToString("F2"));
-        GUILayout.Label("AB的相对速度: " + (rbA.velocity.y - rbB.velocity.y));
-
+        GUILayout.BeginArea(new Rect(10, 10, 700, 400));
+        GUILayout.Label("A穿过B的时间: " + (collisionDuration > 0 ? collisionDuration.ToString("F3") + "秒" : "尚未计算"), fontStyle);
+        GUILayout.Label("A位置: " + cylinderA.transform.position.y.ToString("F2"), fontStyle);
+        GUILayout.Label("B位置: " + cylinderB.transform.position.y.ToString("F2"), fontStyle);
+        GUILayout.Label("AB的相对速度: " + (rbA.velocity.y - rbB.velocity.y).ToString("F2"), fontStyle);
+        GUI.skin.button.fontSize = 50;
         if (GUILayout.Button("重置模拟"))
         {
             ResetSimulation();
